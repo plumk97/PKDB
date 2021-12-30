@@ -62,11 +62,16 @@ extension Float: PLDBFieldType {
     public static var sqliteType: String { "REAL" }
 }
 
+
 // MARK: - Double
 extension Double: PLDBFieldType {
     public static var sqliteType: String { "REAL" }
 }
 
+// MARK: - Bool
+extension Bool: PLDBFieldType {
+    public static var sqliteType: String { "BOOLEAN" }
+}
 
 // MARK: - String
 extension String: PLDBFieldType {

@@ -31,10 +31,13 @@ extension PLDBModel {
         for child in mirror.children {
             if var name = child.label,
                let property = child.value as? PLDBFieldWrapper {
-                name.removeFirst()
                 
                 let desc = property.fieldDescription
-                desc.fieldName = name
+                if desc.fieldName == nil {
+                    name.removeFirst()
+                    desc.fieldName = name
+                }
+                
                 descriptions.append(desc)
             }
         }
@@ -54,10 +57,10 @@ extension PLDBModel {
                 continue
             }
             
+            
             if let value = dict[fieldName] {
                 fd.setValue(value)
             }
-
         }
     }
 }

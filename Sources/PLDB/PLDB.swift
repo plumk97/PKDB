@@ -23,6 +23,12 @@ public class PLDB {
         return self.database.open()
     }
     
+    /// 关闭数据库
+    /// - Returns:
+    @discardableResult
+    public func setKey(_ key: String) -> Bool {
+        return self.database.setKey(key)
+    }
     
     /// 关闭数据库
     /// - Returns:

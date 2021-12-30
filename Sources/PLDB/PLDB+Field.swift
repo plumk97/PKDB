@@ -40,13 +40,14 @@ extension PLDB {
         
         
         public init(wrappedValue value: Value,
-             defaultValue: Value? = nil,
-             primaryKey: Bool = false,
-             unique: Bool = false,
-             notNull: Bool = false,
-             autoIncrement: Bool = false,
-             index: Bool = false,
-             uniqueIndex: Bool = false) {
+                    defaultValue: Value? = nil,
+                    primaryKey: Bool = false,
+                    unique: Bool = false,
+                    notNull: Bool = false,
+                    autoIncrement: Bool = false,
+                    index: Bool = false,
+                    uniqueIndex: Bool = false,
+                    name: String? = nil) {
             
             self.value = value
             
@@ -57,7 +58,8 @@ extension PLDB {
             _fieldDescription.autoIncrement = autoIncrement
             _fieldDescription.index = index
             _fieldDescription.uniqueIndex = uniqueIndex
-
+            
+            _fieldDescription.fieldName = name
             _fieldDescription.fieldType = Value.self
             
             _fieldDescription.getValue = {[unowned self] in
