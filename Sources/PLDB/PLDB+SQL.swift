@@ -128,7 +128,7 @@ extension PLDB {
         
         /// 生成更新语句
         /// - Parameter model:
-        /// - Returns: 
+        /// - Returns:
         static func update(_ model: PLDBModel) -> (String, [Any?]) {
             
             let descriptions = model.extractFields().filter({ !$0.autoIncrement })
@@ -144,7 +144,7 @@ extension PLDB {
         
         /// 生成删除语句
         /// - Parameter model:
-        /// - Returns: 
+        /// - Returns:
         static func delete(_ model: PLDBModel) -> String {
             
             let statment = """
@@ -153,6 +153,20 @@ extension PLDB {
             return statment
         }
         
+        
+        /// 生成删除表所有数据语句
+        /// - Parameter model:
+        /// - Returns:
+        static func deleteTable(_ cls: PLDBModel.Type) -> String {
+            let statment = """
+            DELETE FROM "\(cls.tableName)"
+            """
+            return statment
+        }
+        
+        /// 生成Values
+        /// - Parameter descriptions:
+        /// - Returns:
         private static func generateValues(_ descriptions: [PLDB.FieldDescription]) -> [Any] {
             return descriptions.map({
                 let value = $0.getValue()

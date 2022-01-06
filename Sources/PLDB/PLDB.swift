@@ -132,6 +132,13 @@ public class PLDB {
         return isOk
     }
     
+    /// 删除表中所有数据
+    /// - Returns:
+    public func deleteTable<T: PLDBModel>(_ cls: T.Type) -> Bool {
+        let statment = SQL.deleteTable(cls)
+        let isOk = self.database.executeUpdate(statment, withArgumentsIn: [])
+        return isOk
+    }
     
     /// 最后一次执行错误信息
     /// - Returns:
