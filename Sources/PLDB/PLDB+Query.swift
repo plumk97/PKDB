@@ -9,6 +9,8 @@ import Foundation
 import FMDB
 
 extension PLDB {
+    
+    /// 查询语句对象化
     public class Query<T: PLDBModel> {
         
         private struct Condition {
@@ -26,14 +28,29 @@ extension PLDB {
             let order: Order
         }
         
-        private var database: FMDatabase!
+        
+        /// where 条件语句
         private var conditions = [Condition]()
+        
+        /// 排序
         private var orderBy: OrderBy?
+        
+        /// 限制数量
         private var limitNum: Int?
+        
+        /// 查询偏移
         private var offsetNum: Int?
         
-        fileprivate init(database: FMDatabase) {
-            self.database = database
+        /// PLDB对象
+        private var db: PLDB
+        
+        /// FMDB对象
+        private var database: FMDatabase {
+            return self.db.database
+        }
+        
+        fileprivate init(db: PLDB) {
+            self.db = db
         }
         
         
@@ -69,35 +86,6 @@ extension PLDB {
             return (statment, args as [Any])
         }
         
-        /// 递归查询外部引用
-        /// - Parameter model:
-        private func recursionQueryExternalTable(_ model: PLDBModel, resultDictionary: [AnyHashable: Any]?) {
-            guard let resultDictionary = resultDictionary else {
-                return
-            }
- 
-            let defines = model.extractColumnDefines()
-            for define in defines {
-                if let m = define.getPropertyValue?() as? PLDBModel {
-                    
-                    let tableName = type(of: m).tableName
-                    let uniqueId = m.uniqueId
-                    
-                    guard let id = resultDictionary[uniqueId.0] as? Int else {
-                        continue
-                    }
-                    
-                    guard let ret = self.database.executeQuery("SELECT * FROM \(tableName) WHERE \(uniqueId.0) = ?", withArgumentsIn: [id]),
-                          ret.next() else {
-                        continue
-                    }
-                    
-                    m.update(ret.resultDictionary)
-                    self.recursionQueryExternalTable(m, resultDictionary: resultDictionary)
-                }
-            }
-        }
-        
         /// 取数量
         /// - Returns:
         public func count() -> Int {
@@ -124,8 +112,7 @@ extension PLDB {
             }
             
             let model = T.init()
-            model.update(ret.resultDictionary)
-            self.recursionQueryExternalTable(model, resultDictionary: ret.resultDictionary)
+            model.update(ret.resultDictionary, from: self.db)
             return model
         }
         
@@ -143,8 +130,7 @@ extension PLDB {
             }
             
             let model = T.init()
-            model.update(ret.resultDictionary)
-            self.recursionQueryExternalTable(model, resultDictionary: ret.resultDictionary)
+            model.update(ret.resultDictionary, from: self.db)
             return model
         }
         
@@ -162,8 +148,7 @@ extension PLDB {
             
             while ret.next() {
                 let m = T()
-                m.update(ret.resultDictionary)
-                self.recursionQueryExternalTable(m, resultDictionary: ret.resultDictionary)
+                m.update(ret.resultDictionary, from: self.db)
                 models.append(m)
             }
             
@@ -218,6 +203,6 @@ extension PLDB {
     /// - Parameter type:
     /// - Returns:
     public func query<T: PLDBModel>(_ type: T.Type) -> Query<T> {
-        return Query<T>(database: self.database)
+        return Query<T>(db: self)
     }
 }

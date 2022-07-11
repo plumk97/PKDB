@@ -54,7 +54,7 @@ public class PLDB {
             return true
         }
         
-        let statemts = SQL.create(type(of: model).tableName, defines: model.extractColumnDefines())
+        let statemts = SQL.create(model)
         return self.database.executeStatements(statemts.joined(separator: "\n"))
     }
     
@@ -83,7 +83,7 @@ public class PLDB {
 
         if isOk {
             if let ret = self.database.executeQuery("SELECT * FROM '\(type(of: model).tableName)' WHERE ROWID = ?", withArgumentsIn: [self.database.lastInsertRowId]), ret.next() {
-                model.update(ret.resultDictionary)
+                model.update(ret.resultDictionary, from: self)
             }
         } else {
             print(self.database.lastError())
@@ -137,6 +137,15 @@ public class PLDB {
     /// - Returns:
     public func deleteTable<T: PLDBModel>(_ cls: T.Type) -> Bool {
         let statment = SQL.deleteTable(cls)
+        let isOk = self.database.executeUpdate(statment, withArgumentsIn: [])
+        return isOk
+    }
+    
+    /// 删除表
+    /// - Parameter cls:
+    /// - Returns: 
+    public func dropTable<T: PLDBModel>(_ cls: T.Type) -> Bool {
+        let statment = SQL.dropTable(cls)
         let isOk = self.database.executeUpdate(statment, withArgumentsIn: [])
         return isOk
     }

@@ -2,20 +2,20 @@
 //  BoolTransform.swift
 //  
 //
-//  Created by litiezhu on 2022/7/11.
+//  Created by Plumk on 2022/7/11.
 //
 
 import Foundation
 
 
 extension Bool: ColumnTransformable {
-    static var columnType: ColumnType { .BOOLEAN }
+    public static var columnType: ColumnType { .BOOLEAN }
     
-    static func transformFromColumnValue(_ value: Any) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
         return value as? Self
     }
     
-    func transformToColumnValue() -> Any? {
+    public func transformToColumnValue() -> Any? {
         return self
     }
 }

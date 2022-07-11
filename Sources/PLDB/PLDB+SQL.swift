@@ -16,14 +16,21 @@ extension PLDB {
         /// - Parameters:
         ///   - tableName:
         ///   - descriptions:
-        static func create(_ tableName: String, defines: [ColumnDefine]) -> [String] {
+        static func create(_ model: PLDBModel) -> [String] {
             
+            let tableName = type(of: model).tableName
+            let defines = model.extractColumnDefines()
             
+            /// 主键字段
             var primaryFields = [ColumnDefine]()
             
+            /// 索引字段
             var indexFields = [ColumnDefine]()
+            
+            /// 唯一索引字段
             var uniqueIndexFields = [ColumnDefine]()
             
+            /// - 生成创建表语句
             var rows = [String]()
             for define in defines {
                 
@@ -84,6 +91,7 @@ extension PLDB {
             
             var statments = [createStatement]
             
+            /// 生成创建索引语句
             if indexFields.count > 0 {
                 
                 let statment = """
@@ -96,6 +104,7 @@ extension PLDB {
             }
             
             
+            /// 生成创建唯一索引语句
             if uniqueIndexFields.count > 0 {
                 
                 let statment = """
@@ -134,8 +143,10 @@ extension PLDB {
             let defines = model.extractColumnDefines().filter({ !$0.autoIncrement })
             let fields = defines.map({ "\"\($0.name!)\"" })
             
+            let cls = type(of: model)
+            
             let statment = """
-            UPDATE "\(type(of: model).tableName)" SET \(fields.map({ "\($0) = ?"}).joined(separator: ", ")) WHERE \(model.uniqueId.0) = \(model.uniqueId.1)
+            UPDATE "\(cls.tableName)" SET \(fields.map({ "\($0) = ?"}).joined(separator: ", ")) WHERE \(cls.uniqueIdName) = \(model.uniqueId)
             """
             
             return (statment, generateValues(defines))
@@ -147,8 +158,10 @@ extension PLDB {
         /// - Returns:
         static func delete(_ model: PLDBModel) -> String {
             
+            let cls = type(of: model)
+            
             let statment = """
-            DELETE FROM "\(type(of: model).tableName)" WHERE \(model.uniqueId.0) = \(model.uniqueId.1)
+            DELETE FROM "\(cls.tableName)" WHERE \(cls.uniqueIdName) = \(model.uniqueId)
             """
             return statment
         }
@@ -164,13 +177,26 @@ extension PLDB {
             return statment
         }
         
+        /// 生成删除表语句
+        /// - Parameter cls:
+        /// - Returns:
+        static func dropTable(_ cls: PLDBModel.Type) -> String {
+            let statment = """
+            DROP TABLE "\(cls.tableName)"
+            """
+            return statment
+        }
+        
         /// 生成Values
         /// - Parameter descriptions:
         /// - Returns:
         private static func generateValues(_ defines: [ColumnDefine]) -> [Any?] {
             return defines.map({
-                let value = $0.getPropertyValue?()
-                return value
+                if let transform = $0.getPropertyValue?() as? ColumnTransformable {
+                    return transform.transformToColumnValue()
+                }
+                
+                return nil
             })
         }
     }

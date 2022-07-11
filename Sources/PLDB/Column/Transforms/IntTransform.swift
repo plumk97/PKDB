@@ -2,19 +2,19 @@
 //  IntTransform.swift
 //  
 //
-//  Created by litiezhu on 2022/7/11.
+//  Created by Plumk on 2022/7/11.
 //
 
 import Foundation
 
 
-protocol IntTransform: ColumnTransformable {
+public protocol IntTransform: ColumnTransformable {
 }
 
-extension IntTransform {
+public extension IntTransform {
     static var columnType: ColumnType { .INTEGER }
     
-    static func transformFromColumnValue(_ value: Any) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
         return value as? Self
     }
     

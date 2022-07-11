@@ -1,8 +1,8 @@
 //
-//  File.swift
+//  PLDBModel.swift
 //  
 //
-//  Created by litiezhu on 2022/7/11.
+//  Created by Plumk on 2022/7/11.
 //
 
 import Foundation
@@ -35,7 +35,7 @@ extension PLDBModel {
     }
     
     
-    func update(_ dict: [AnyHashable: Any]?) {
+    func update(_ dict: [AnyHashable: Any]?, from db: PLDB) {
         guard let dict = dict else {
             return
         }
@@ -47,9 +47,8 @@ extension PLDBModel {
                 continue
             }
             
-            
-            if let value = dict[name] {
-                define.setPropertyValue?(value)
+            if let value = dict[name], let propertyValue = define.propertyType.transformFromColumnValue(value, from: db) {
+                define.setPropertyValue?(propertyValue)
             }
         }
     }

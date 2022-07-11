@@ -2,19 +2,19 @@
 //  DataTransform.swift
 //  
 //
-//  Created by litiezhu on 2022/7/11.
+//  Created by Plumk on 2022/7/11.
 //
 
 import Foundation
 
 extension Data: ColumnTransformable {
-    static var columnType: ColumnType { .REAL }
+    public static var columnType: ColumnType { .BLOB }
     
-    static func transformFromColumnValue(_ value: Any) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
         return value as? Self
     }
     
-    func transformToColumnValue() -> Any? {
+    public func transformToColumnValue() -> Any? {
         return self
     }
 }

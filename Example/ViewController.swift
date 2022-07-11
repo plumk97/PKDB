@@ -10,37 +10,39 @@ import PLDB
 
 struct Address: PLDBModel {
     static var tableName: String { "Address" }
-    var uniqueId: (String, Int) { ("id", self.id) }
+    static var uniqueIdName: String { "id" }
+    var uniqueId: Int { self.id }
     
-    @PLDB.Field(primaryKey: true, autoIncrement: true, index: true)
+    @Column(primaryKey: true, autoIncrement: true, index: true)
     var id: Int = 0
     
-    @PLDB.Field
+    @Column
     var address = ""
 }
 
 struct User: PLDBModel {
     
     static var tableName: String { "User" }
-    var uniqueId: (String, Int) { ("id", self.id) }
+    static var uniqueIdName: String { "id" }
+    var uniqueId: Int { self.id }
     
-    @PLDB.Field(primaryKey: true, autoIncrement: true, index: true)
+    @Column(primaryKey: true, autoIncrement: true, index: true)
     var id: Int = 0
 
-    @PLDB.Field
+    @Column
     var name = ""
     
-    @PLDB.Field
+    @Column
     var title = ""
     
-    @PLDB.Field
-    var address = Address()
+    @Column
+    var address: Address?
     
-    @PLDB.Field
-    var data = Data()
+    @Column
+    var data: Data?
     
-    @PLDB.Field
-    var date = Date()
+    @Column
+    var date: Date?
 }
 
 class ViewController: UIViewController {
@@ -78,14 +80,15 @@ class ViewController: UIViewController {
     @IBAction func insertBtnClick(_ sender: UIButton) {
         
         let user = User()
+        user.address = Address()
         if arc4random() % 100 > 50 {
             user.name = "张三"
             user.title = "CTO"
-            user.address.address = "深圳市福田区"
+            user.address?.address = "深圳市福田区"
         } else {
             user.name = "李四"
             user.title = "CEO"
-            user.address.address = "深圳市南山区"
+            user.address?.address = "深圳市南山区"
         }
         
         user.data = "data".data(using: .utf8)!
@@ -105,11 +108,11 @@ class ViewController: UIViewController {
         if arc4random() % 100 > 50 {
             model.name = "张三"
             model.title = "CTO"
-            model.address.address = "深圳市福田区"
+            model.address?.address = "深圳市福田区1"
         } else {
             model.name = "李四"
             model.title = "CEO"
-            model.address.address = "深圳市南山区"
+            model.address?.address = "深圳市南山区1"
         }
         self.db.save(model)
         self.tableView.reloadRows(at: [ip], with: .automatic)
@@ -121,7 +124,10 @@ class ViewController: UIViewController {
         }
         
         let model = self.models[ip.row]
-        print(self.db.delete(model.address))
+        if let address = model.address {
+            print(self.db.delete(address))
+        }
+        
         print(self.db.delete(model))
         self.models.remove(at: ip.row)
         self.tableView.deleteRows(at: [ip], with: .automatic)
@@ -141,7 +147,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         
         let model = self.models[indexPath.row]
         cell.textLabel?.text = model.name
-        cell.detailTextLabel?.text = model.title + " " + model.address.address
+        cell.detailTextLabel?.text = model.title + " " + (model.address?.address ?? "")
         
         return cell
     }

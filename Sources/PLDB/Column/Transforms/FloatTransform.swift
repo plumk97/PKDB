@@ -2,18 +2,18 @@
 //  FloatTransform.swift
 //  
 //
-//  Created by litiezhu on 2022/7/11.
+//  Created by Plumk on 2022/7/11.
 //
 
 import Foundation
 
-protocol FloatTransform: ColumnTransformable {
+public protocol FloatTransform: ColumnTransformable {
 }
 
-extension FloatTransform {
+public extension FloatTransform {
     static var columnType: ColumnType { .REAL }
     
-    static func transformFromColumnValue(_ value: Any) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
         return value as? Self
     }
     
