@@ -17,20 +17,29 @@ extension PLDBModel {
         
         var defines = [ColumnDefine]()
         
-        let mirror = Mirror(reflecting: self)
-        for child in mirror.children {
-            if var name = child.label,
-               let property = child.value as? ColumnProperty {
-                
-                let define = property.define
-                if define.name == nil {
-                    name.removeFirst()
-                    define.name = name
+        func extract(_ mirror: Mirror) {
+            for child in mirror.children {
+                if var name = child.label,
+                   let property = child.value as? ColumnProperty {
+                    
+                    let define = property.define
+                    if define.name == nil {
+                        name.removeFirst()
+                        define.name = name
+                    }
+                    
+                    defines.append(define)
                 }
-                
-                defines.append(define)
+            }
+            
+            if let superMirror = mirror.superclassMirror {
+                extract(superMirror)
             }
         }
+        
+        let mirror = Mirror(reflecting: self)
+        extract(mirror)
+        
         return defines
     }
     
