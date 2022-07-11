@@ -16,44 +16,44 @@ extension PLDB {
         /// - Parameters:
         ///   - tableName:
         ///   - descriptions:
-        static func create(_ tableName: String, descriptions: [FieldDescription]) -> [String] {
+        static func create(_ tableName: String, defines: [ColumnDefine]) -> [String] {
             
             
-            var primaryFields = [FieldDescription]()
+            var primaryFields = [ColumnDefine]()
             
-            var indexFields = [FieldDescription]()
-            var uniqueIndexFields = [FieldDescription]()
+            var indexFields = [ColumnDefine]()
+            var uniqueIndexFields = [ColumnDefine]()
             
             var rows = [String]()
-            for desc in descriptions {
+            for define in defines {
                 
-                let sqlType = desc.fieldType.sqliteType
-                guard let fieldName = desc.fieldName else {
+                let columnType = define.columnType
+                guard let name = define.name else {
                     continue
                 }
                 
-                var row = "\"\(fieldName)\" \(sqlType)"
+                var row = "\"\(name)\" \(columnType.rawValue)"
                 
-                if desc.notNull {
+                if define.notNull {
                     row += " NOT NULL"
                 }
                 
-                if let defaultValue = desc.defaultValue {
+                if let defaultValue = define.defaultValue {
                     row += " DEFAULT \(defaultValue)"
                 }
                 
-                if desc.unique {
+                if define.unique {
                     row += " UNIQUE"
                 }
                 
-                if desc.primaryKey {
-                    primaryFields.append(desc)
+                if define.primaryKey {
+                    primaryFields.append(define)
                 }
                 
-                if desc.uniqueIndex {
-                    uniqueIndexFields.append(desc)
-                } else if desc.index {
-                    indexFields.append(desc)
+                if define.uniqueIndex {
+                    uniqueIndexFields.append(define)
+                } else if define.index {
+                    indexFields.append(define)
                 }
                 
                 rows.append(row)
@@ -63,10 +63,10 @@ extension PLDB {
             if primaryFields.count > 0 {
                 primaryStatment = "PRIMARY KEY("
                 
-                if let desc = primaryFields.first(where: { $0.autoIncrement }) {
-                    primaryStatment += "\"\(desc.fieldName!)\" AUTOINCREMENT"
+                if let define = primaryFields.first(where: { $0.autoIncrement }) {
+                    primaryStatment += "\"\(define.name!)\" AUTOINCREMENT"
                 } else {
-                    primaryStatment += "\(primaryFields.map({ "\"\($0.fieldName!)\"" }).joined(separator: ","))"
+                    primaryStatment += "\(primaryFields.map({ "\"\($0.name!)\"" }).joined(separator: ","))"
                 }
                 primaryStatment += ")"
             }
@@ -88,7 +88,7 @@ extension PLDB {
                 
                 let statment = """
                 CREATE INDEX "\(tableName)_Index" ON "\(tableName)" (
-                \(indexFields.map({ "\"\($0.fieldName!)\" ASC"}).joined(separator: ",\n"))
+                \(indexFields.map({ "\"\($0.name!)\" ASC"}).joined(separator: ",\n"))
                 );
                 """
                 
@@ -100,7 +100,7 @@ extension PLDB {
                 
                 let statment = """
                 CREATE UNIQUE INDEX "\(tableName)_Unique_Index" ON "\(tableName)" (
-                \(uniqueIndexFields.map({ "\"\($0.fieldName!)\" ASC"}).joined(separator: ",\n"))
+                \(uniqueIndexFields.map({ "\"\($0.name!)\" ASC"}).joined(separator: ",\n"))
                 );
                 """
                 
@@ -115,14 +115,14 @@ extension PLDB {
         /// - Parameter model:
         static func insert(_ model: PLDBModel) -> (String, [Any?]) {
             
-            let descriptions = model.extractFields().filter({ !$0.autoIncrement })
-            let fields = descriptions.map({ "\"\($0.fieldName!)\"" })
+            let defines = model.extractColumnDefines().filter({ !$0.autoIncrement })
+            let fields = defines.map({ "\"\($0.name!)\"" })
             
             let statment = """
             INSERT INTO "\(type(of: model).tableName)" (\(fields.joined(separator: ","))) VALUES (\(fields.map({ _ in "?" }).joined(separator: ",")))
             """
             
-            return (statment, generateValues(descriptions))
+            return (statment, generateValues(defines))
         }
         
         
@@ -131,14 +131,14 @@ extension PLDB {
         /// - Returns:
         static func update(_ model: PLDBModel) -> (String, [Any?]) {
             
-            let descriptions = model.extractFields().filter({ !$0.autoIncrement })
-            let fields = descriptions.map({ "\"\($0.fieldName!)\"" })
+            let defines = model.extractColumnDefines().filter({ !$0.autoIncrement })
+            let fields = defines.map({ "\"\($0.name!)\"" })
             
             let statment = """
             UPDATE "\(type(of: model).tableName)" SET \(fields.map({ "\($0) = ?"}).joined(separator: ", ")) WHERE \(model.uniqueId.0) = \(model.uniqueId.1)
             """
             
-            return (statment, generateValues(descriptions))
+            return (statment, generateValues(defines))
         }
         
         
@@ -167,18 +167,9 @@ extension PLDB {
         /// 生成Values
         /// - Parameter descriptions:
         /// - Returns:
-        private static func generateValues(_ descriptions: [PLDB.FieldDescription]) -> [Any] {
-            return descriptions.map({
-                let value = $0.getValue()
-                
-                if let model = value as? PLDBModel {
-                    return model.uniqueId.1
-                }
-                
-                if let date = value as? Date {
-                    return date.timeIntervalSince1970
-                }
-                
+        private static func generateValues(_ defines: [ColumnDefine]) -> [Any?] {
+            return defines.map({
+                let value = $0.getPropertyValue?()
                 return value
             })
         }

@@ -22,5 +22,10 @@ let package = Package(
             dependencies: [
                 .product(name: "FMDB", package: "fmdb")
             ]),
+        
+        .testTarget(
+            name: "CURDTests",
+            dependencies: ["PLDB"]
+        )
     ]
 )

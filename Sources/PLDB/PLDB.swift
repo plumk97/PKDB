@@ -54,7 +54,7 @@ public class PLDB {
             return true
         }
         
-        let statemts = SQL.create(type(of: model).tableName, descriptions: model.extractFields())
+        let statemts = SQL.create(type(of: model).tableName, defines: model.extractColumnDefines())
         return self.database.executeStatements(statemts.joined(separator: "\n"))
     }
     
@@ -70,10 +70,10 @@ public class PLDB {
     /// - Parameter model:
     /// - Returns:
     private func recursionCreate(_ model: PLDBModel) -> PLDBModel {
-        let fds = model.extractFields()
-        for fd in fds {
-            if let m = fd.getValue() as? PLDBModel {
-                fd.setValue(self.recursionCreate(m))
+        let defines = model.extractColumnDefines()
+        for define in defines {
+            if let m = define.getPropertyValue?() as? PLDBModel {
+                define.setPropertyValue?(self.recursionCreate(m))
             }
         }
         
@@ -106,9 +106,10 @@ public class PLDB {
     /// - Returns:
     private func recursionSave(_ model: PLDBModel) -> Bool {
         
-        let fds = model.extractFields()
-        for fd in fds {
-            if let m = fd.getValue() as? PLDBModel {
+        
+        let defines = model.extractColumnDefines()
+        for define in defines {
+            if let m = define.getPropertyValue?() as? PLDBModel {
                 if !self.recursionSave(m) {
                     return false
                 }

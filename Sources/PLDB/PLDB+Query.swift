@@ -76,9 +76,9 @@ extension PLDB {
                 return
             }
  
-            let fds = model.extractFields()
-            for fd in fds {
-                if let m = fd.getValue() as? PLDBModel {
+            let defines = model.extractColumnDefines()
+            for define in defines {
+                if let m = define.getPropertyValue?() as? PLDBModel {
                     
                     let tableName = type(of: m).tableName
                     let uniqueId = m.uniqueId
