@@ -8,6 +8,10 @@
 import XCTest
 @testable import PLDB
 
+enum Gender: Int, PLDBEnum {
+    case woman = 0
+    case man = 1
+}
 
 struct User: PLDBModel {
     
@@ -20,6 +24,9 @@ struct User: PLDBModel {
     
     @Column(primaryKey: true, autoIncrement: true, index: true)
     var id = 0
+    
+    @Column
+    var gender = Gender.man
     
     @Column
     var name: String?
