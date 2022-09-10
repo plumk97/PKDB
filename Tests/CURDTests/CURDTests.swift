@@ -152,4 +152,13 @@ final class CURDTests: XCTestCase {
             db.save(user)
         }
     }
+    
+    func testRaw() throws {
+        let db = createDB()
+        
+        guard let models = db.raw("SELECT * FROM User").query(User.self) else {
+            fatalError()
+        }
+        print(models.last)
+    }
 }

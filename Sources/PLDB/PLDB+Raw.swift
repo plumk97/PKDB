@@ -16,18 +16,37 @@ extension PLDB {
         /// SQL语句
         private var statment: String!
         
-        /// FMDB对象
-        private var database: FMDatabase!
+        /// 数据库对象
+        private var db: PLDB!
         
-        fileprivate init(statment: String, database: FMDatabase) {
+        private var database: FMDatabase {
+            return self.db.database
+        }
+        
+        fileprivate init(statment: String, db: PLDB) {
             self.statment = statment
-            self.database = database
+            self.db = db
         }
         
         /// 查询
         /// - Returns:
         public func query() -> FMResultSet? {
             return self.database.executeQuery(self.statment, withArgumentsIn: [])
+        }
+        
+        public func query<T: PLDBModel>(_ model: T.Type) -> [T]? {
+            guard let ret = self.query() else {
+                return nil
+            }
+            
+            var models = [T]()
+            while ret.next() {
+                
+                let model = T.init()
+                model.update(ret.resultDictionary, from: self.db)
+                models.append(model)
+            }
+            return models
         }
         
         /// 更新
@@ -51,6 +70,6 @@ extension PLDB {
     /// - Parameter statment:
     /// - Returns:
     public func raw(_ statment: String) -> Raw {
-        return Raw(statment: statment, database: self.database)
+        return Raw(statment: statment, db: self)
     }
 }
