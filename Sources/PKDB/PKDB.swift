@@ -1,6 +1,6 @@
 //
-//  PLDB.swift
-//  PLDB
+//  PKDB.swift
+//  PKDB
 //
 //  Created by Plumk on 2021/7/28.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import FMDB
 
-public class PLDB {
+public class PKDB {
     
     private(set) var database: FMDatabase!
     
@@ -41,7 +41,7 @@ public class PLDB {
     /// - Parameter cls:
     /// - Returns:
     @discardableResult
-    public func tableExists(_ cls: PLDBModel.Type) -> Bool {
+    public func tableExists(_ cls: PKDBModel.Type) -> Bool {
         return self.database.tableExists(cls.tableName)
     }
     
@@ -49,7 +49,7 @@ public class PLDB {
     /// - Parameter model:
     /// - Returns:
     @discardableResult
-    public func createTable(_ model: PLDBModel) -> Bool {
+    public func createTable(_ model: PKDBModel) -> Bool {
         if self.tableExists(type(of: model)) {
             return true
         }
@@ -61,7 +61,7 @@ public class PLDB {
     /// 创建一条数据
     /// - Parameter model:
     /// - Returns:
-    public func create<T: PLDBModel>(_ model: T) -> T {
+    public func create<T: PKDBModel>(_ model: T) -> T {
         return self.recursionCreate(model) as! T
     }
     
@@ -69,10 +69,10 @@ public class PLDB {
     /// 递归创建数据 如果有引用外部表也一起创建
     /// - Parameter model:
     /// - Returns:
-    private func recursionCreate(_ model: PLDBModel) -> PLDBModel {
+    private func recursionCreate(_ model: PKDBModel) -> PKDBModel {
         let defines = model.extractColumnDefines()
         for define in defines {
-            if let m = define.getPropertyValue?() as? PLDBModel {
+            if let m = define.getPropertyValue?() as? PKDBModel {
                 define.setPropertyValue?(self.recursionCreate(m))
             }
         }
@@ -82,7 +82,8 @@ public class PLDB {
         let isOk = self.database.executeUpdate(tp.0, withArgumentsIn: tp.1 as [Any])
 
         if isOk {
-            if let ret = self.database.executeQuery("SELECT * FROM '\(type(of: model).tableName)' WHERE ROWID = ?", withArgumentsIn: [self.database.lastInsertRowId]), ret.next() {
+            let stmt = "SELECT * FROM [\(type(of: model).tableName)] WHERE ROWID = ?"
+            if let ret = self.database.executeQuery(stmt, withArgumentsIn: [self.database.lastInsertRowId]), ret.next() {
                 model.update(ret.resultDictionary, from: self)
             }
         } else {
@@ -96,7 +97,7 @@ public class PLDB {
     /// 保存一条数据
     /// - Parameter model:
     @discardableResult
-    public func save<T: PLDBModel>(_ model: T) -> Bool {
+    public func save<T: PKDBModel>(_ model: T) -> Bool {
         return self.recursionSave(model)
     }
     
@@ -104,12 +105,12 @@ public class PLDB {
     /// 递归保存数据 如果有外部表数据也一起保存
     /// - Parameter model:
     /// - Returns:
-    private func recursionSave(_ model: PLDBModel) -> Bool {
+    private func recursionSave(_ model: PKDBModel) -> Bool {
         
         
         let defines = model.extractColumnDefines()
         for define in defines {
-            if let m = define.getPropertyValue?() as? PLDBModel {
+            if let m = define.getPropertyValue?() as? PKDBModel {
                 if !self.recursionSave(m) {
                     return false
                 }
@@ -127,7 +128,7 @@ public class PLDB {
     /// - Parameter model:
     /// - Returns:
     @discardableResult
-    public func delete<T: PLDBModel>(_ model: T) -> Bool {
+    public func delete<T: PKDBModel>(_ model: T) -> Bool {
         let statment = SQL.delete(model)
         let isOk = self.database.executeUpdate(statment, withArgumentsIn: [])
         return isOk
@@ -135,7 +136,7 @@ public class PLDB {
     
     /// 删除表中所有数据
     /// - Returns:
-    public func deleteTable<T: PLDBModel>(_ cls: T.Type) -> Bool {
+    public func deleteTable<T: PKDBModel>(_ cls: T.Type) -> Bool {
         let statment = SQL.deleteTable(cls)
         let isOk = self.database.executeUpdate(statment, withArgumentsIn: [])
         return isOk
@@ -144,7 +145,7 @@ public class PLDB {
     /// 删除表
     /// - Parameter cls:
     /// - Returns: 
-    public func dropTable<T: PLDBModel>(_ cls: T.Type) -> Bool {
+    public func dropTable<T: PKDBModel>(_ cls: T.Type) -> Bool {
         let statment = SQL.dropTable(cls)
         let isOk = self.database.executeUpdate(statment, withArgumentsIn: [])
         return isOk
@@ -158,19 +159,19 @@ public class PLDB {
     
     
     // MARK: - 事务
-    public func beginTransaction() -> Bool {
-        return self.database.beginTransaction()
+    @discardableResult
+    public func transaction(exec: (_ db: PKDB) -> Error?) -> Bool {
+        var isOk = self.database.beginTransaction()
+        
+        if isOk {
+            if exec(self) == nil {
+                isOk = self.database.commit()
+            } else {
+                isOk = self.database.rollback()
+            }
+        }
+        return isOk
     }
-    
-    public func rollback() -> Bool {
-        return self.database.rollback()
-    }
-    
-    
-    public func commit() -> Bool {
-        return self.database.commit()
-    }
-    
 }
 
 

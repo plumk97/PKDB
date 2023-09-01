@@ -1,5 +1,5 @@
 //
-//  PLDBModel.swift
+//  PKDBModel.swift
 //  
 //
 //  Created by Plumk on 2022/7/11.
@@ -9,7 +9,7 @@ import Foundation
 
 
 
-extension PLDBModel {
+extension PKDBModel {
     
     /// 获取model中的数据库字段
     /// - Returns:
@@ -44,7 +44,7 @@ extension PLDBModel {
     }
     
     
-    func update(_ dict: [AnyHashable: Any]?, from db: PLDB) {
+    func update(_ dict: [AnyHashable: Any]?, from db: PKDB) {
         guard let dict = dict else {
             return
         }

@@ -11,7 +11,7 @@ import Foundation
 extension Bool: ColumnTransformable {
     public static var columnType: ColumnType { .BOOLEAN }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         return value as? Self
     }
     

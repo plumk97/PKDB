@@ -1,6 +1,6 @@
 //
-//  PLDB+Raw.swift
-//  PLDB
+//  PKDB+Raw.swift
+//  PKDB
 //
 //  Created by Plumk on 2021/7/29.
 //
@@ -8,7 +8,7 @@
 import Foundation
 import FMDB
 
-extension PLDB {
+extension PKDB {
     
     /// 执行原始SQL语句
     public class Raw {
@@ -17,13 +17,13 @@ extension PLDB {
         private var statment: String!
         
         /// 数据库对象
-        private var db: PLDB!
+        private var db: PKDB!
         
         private var database: FMDatabase {
             return self.db.database
         }
         
-        fileprivate init(statment: String, db: PLDB) {
+        fileprivate init(statment: String, db: PKDB) {
             self.statment = statment
             self.db = db
         }
@@ -34,7 +34,7 @@ extension PLDB {
             return self.database.executeQuery(self.statment, withArgumentsIn: [])
         }
         
-        public func query<T: PLDBModel>(_ model: T.Type) -> [T]? {
+        public func query<T: PKDBModel>(_ model: T.Type) -> [T]? {
             guard let ret = self.query() else {
                 return nil
             }

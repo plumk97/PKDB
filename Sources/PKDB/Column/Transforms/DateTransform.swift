@@ -10,7 +10,7 @@ import Foundation
 extension Date: ColumnTransformable {
     public static var columnType: ColumnType { .REAL }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         guard let timestamp = value as? TimeInterval else {
             return nil
         }

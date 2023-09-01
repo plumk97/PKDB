@@ -6,14 +6,14 @@
 //
 
 import XCTest
-@testable import PLDB
+@testable import PKDB
 
-enum Gender: Int, PLDBEnum {
+enum Gender: Int, PKDBEnum {
     case woman = 0
     case man = 1
 }
 
-struct User: PLDBModel {
+struct User: PKDBModel {
     
     /// 表名
     static var tableName: String { "User" }
@@ -51,7 +51,7 @@ struct User: PLDBModel {
     
 }
 
-struct Pet: PLDBModel {
+struct Pet: PKDBModel {
     
     /// 表名
     static var tableName: String { "Pet" }
@@ -73,13 +73,13 @@ final class CURDTests: XCTestCase {
     
     func createDBPath() -> String {
         var path = FileManager.default.homeDirectoryForCurrentUser
-        path.appendPathComponent("pl_test.db")
+        path.appendPathComponent("pk_test.db")
 //        try? FileManager.default.removeItem(at: path)
         return path.relativePath
     }
     
-    func createDB() -> PLDB {
-        let db = PLDB(path: createDBPath())
+    func createDB() -> PKDB {
+        let db = PKDB(path: createDBPath())
         
         XCTAssert(db.open(), "数据库打开失败")
         db.createTable(User())
@@ -87,7 +87,7 @@ final class CURDTests: XCTestCase {
         return db
     }
     
-    func insertOneData() -> PLDB {
+    func insertOneData() -> PKDB {
         let db = createDB()
         let user = db.create(User(name: "xxx", pet: Pet(name: "dog")))
         print(user)
@@ -112,12 +112,12 @@ final class CURDTests: XCTestCase {
     
     func testBatchInsert_Transaction() throws {
         let db = createDB()
-        XCTAssert(db.beginTransaction(), "开启事务失败")
-        
-        for i in 1 ... 10000 {
-            _ = db.create(User(name: "user_\(i)"))
+        db.transaction { db in
+            for i in 1 ... 10000 {
+                _ = db.create(User(name: "user_\(i)"))
+            }
+            return nil
         }
-        XCTAssert(db.commit(), "提交事务失败")
     }
     
     func testQuery() throws {
@@ -132,6 +132,11 @@ final class CURDTests: XCTestCase {
         if let users = db.query(User.self).all() {
             print(users.count)
         }
+
+        if let user = db.query(User.self).where("name = ?", "user_1").first() {
+            print(user)
+        }
+        
     }
     
     func testDelete() throws {

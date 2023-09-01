@@ -1,5 +1,5 @@
 //
-//  PLDBEnum.swift
+//  PKDBEnum.swift
 //  
 //
 //  Created by Plumk on 2022/7/11.
@@ -7,11 +7,11 @@
 
 import Foundation
 
-public protocol PLDBEnum: ColumnTransformable {
+public protocol PKDBEnum: ColumnTransformable {
     
 }
 
-public extension RawRepresentable where Self: PLDBEnum, RawValue: ColumnTransformable {
+public extension RawRepresentable where Self: PKDBEnum, RawValue: ColumnTransformable {
     
     /// 字段类型
     static var columnType: ColumnType { RawValue.columnType }
@@ -19,7 +19,7 @@ public extension RawRepresentable where Self: PLDBEnum, RawValue: ColumnTransfor
     /// 转换数据库数据为当前类型
     /// - Parameter value:
     /// - Returns:
-    static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         if let x = RawValue.transformFromColumnValue(value, from: db) {
             return .init(rawValue: x)
         }

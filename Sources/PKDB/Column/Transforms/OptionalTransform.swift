@@ -12,7 +12,7 @@ extension Optional: ColumnTransformable where Wrapped: ColumnTransformable {
         return Wrapped.columnType
     }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Optional<Wrapped>? {
+    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Optional<Wrapped>? {
         return Wrapped.transformFromColumnValue(value, from: db)
     }
     

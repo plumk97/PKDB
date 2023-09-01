@@ -1,6 +1,6 @@
 //
-//  PLDB+Query.swift
-//  PLDB
+//  PKDB+Query.swift
+//  PKDB
 //
 //  Created by Plumk on 2021/7/28.
 //
@@ -8,10 +8,10 @@
 import Foundation
 import FMDB
 
-extension PLDB {
+extension PKDB {
     
     /// 查询语句对象化
-    public class Query<T: PLDBModel> {
+    public class Query<T: PKDBModel> {
         
         private struct Condition {
             let statment: String
@@ -41,15 +41,15 @@ extension PLDB {
         /// 查询偏移
         private var offsetNum: Int?
         
-        /// PLDB对象
-        private var db: PLDB
+        /// PKDB对象
+        private var db: PKDB
         
         /// FMDB对象
         private var database: FMDatabase {
             return self.db.database
         }
         
-        fileprivate init(db: PLDB) {
+        fileprivate init(db: PKDB) {
             self.db = db
         }
         
@@ -90,7 +90,7 @@ extension PLDB {
         /// - Returns:
         public func count() -> Int {
             
-            let tp = self.combine(preStatment: "SELECT COUNT(*) FROM '\(T.tableName)'")
+            let tp = self.combine(preStatment: "SELECT COUNT(*) FROM [\(T.tableName)]")
             guard let ret = self.database.executeQuery(tp.0, withArgumentsIn: tp.1),
                   ret.next() else {
                 return 0
@@ -105,8 +105,8 @@ extension PLDB {
             _ = self.order(by: "ROWID", order: .asc)
             _ = self.limit(1)
             
-            let tp = self.combine(preStatment: "SELECT * FROM '\(T.tableName)'")
-            guard let ret = self.database.executeQuery(tp.0, withArgumentsIn: tp.1),
+            let tp = self.combine(preStatment: "SELECT * FROM [\(T.tableName)]")
+            guard let ret = try? self.database.executeQuery(tp.0, values: tp.1),
                   ret.next() else {
                 return nil
             }
@@ -123,7 +123,7 @@ extension PLDB {
             _ = self.order(by: "ROWID", order: .desc)
             _ = self.limit(1)
             
-            let tp = self.combine(preStatment: "SELECT * FROM '\(T.tableName)'")
+            let tp = self.combine(preStatment: "SELECT * FROM [\(T.tableName)]")
             guard let ret = self.database.executeQuery(tp.0, withArgumentsIn: tp.1),
                   ret.next() else {
                 return nil
@@ -139,7 +139,7 @@ extension PLDB {
         /// - Returns:
         public func all() -> [T]? {
             
-            let tp = self.combine(preStatment: "SELECT * FROM '\(T.tableName)'")
+            let tp = self.combine(preStatment: "SELECT * FROM [\(T.tableName)]")
             guard let ret = self.database.executeQuery(tp.0, withArgumentsIn: tp.1) else {
                 return nil
             }
@@ -202,7 +202,7 @@ extension PLDB {
     /// 开启查询
     /// - Parameter type:
     /// - Returns:
-    public func query<T: PLDBModel>(_ type: T.Type) -> Query<T> {
+    public func query<T: PKDBModel>(_ type: T.Type) -> Query<T> {
         return Query<T>(db: self)
     }
 }

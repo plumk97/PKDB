@@ -14,7 +14,7 @@ public protocol IntTransform: ColumnTransformable {
 public extension IntTransform {
     static var columnType: ColumnType { .INTEGER }
     
-    static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         return value as? Self
     }
     

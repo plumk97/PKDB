@@ -10,7 +10,7 @@ import Foundation
 extension String: ColumnTransformable {
     public static var columnType: ColumnType { .TEXT }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         return value as? Self
     }
     

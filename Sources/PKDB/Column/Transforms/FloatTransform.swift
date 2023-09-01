@@ -13,7 +13,7 @@ public protocol FloatTransform: ColumnTransformable {
 public extension FloatTransform {
     static var columnType: ColumnType { .REAL }
     
-    static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         return value as? Self
     }
     

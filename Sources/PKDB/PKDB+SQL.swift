@@ -1,6 +1,6 @@
 //
-//  PLDB+SQL.swift
-//  PLDB
+//  PKDB+SQL.swift
+//  PKDB
 //
 //  Created by Plumk on 2021/7/28.
 //
@@ -8,7 +8,7 @@
 import Foundation
 
 
-extension PLDB {
+extension PKDB {
     class SQL {
         
         
@@ -16,7 +16,7 @@ extension PLDB {
         /// - Parameters:
         ///   - tableName:
         ///   - descriptions:
-        static func create(_ model: PLDBModel) -> [String] {
+        static func create(_ model: PKDBModel) -> [String] {
             
             let tableName = type(of: model).tableName
             let defines = model.extractColumnDefines()
@@ -122,13 +122,13 @@ extension PLDB {
         
         /// 生成插入语句
         /// - Parameter model:
-        static func insert(_ model: PLDBModel) -> (String, [Any?]) {
+        static func insert(_ model: PKDBModel) -> (String, [Any?]) {
             
             let defines = model.extractColumnDefines().filter({ !$0.autoIncrement })
             let fields = defines.map({ "\"\($0.name!)\"" })
             
             let statment = """
-            INSERT INTO "\(type(of: model).tableName)" (\(fields.joined(separator: ","))) VALUES (\(fields.map({ _ in "?" }).joined(separator: ",")))
+            INSERT INTO [\(type(of: model).tableName)] (\(fields.joined(separator: ","))) VALUES (\(fields.map({ _ in "?" }).joined(separator: ",")))
             """
             
             return (statment, generateValues(defines))
@@ -138,7 +138,7 @@ extension PLDB {
         /// 生成更新语句
         /// - Parameter model:
         /// - Returns:
-        static func update(_ model: PLDBModel) -> (String, [Any?]) {
+        static func update(_ model: PKDBModel) -> (String, [Any?]) {
             
             let defines = model.extractColumnDefines().filter({ !$0.autoIncrement })
             let fields = defines.map({ "\"\($0.name!)\"" })
@@ -146,7 +146,7 @@ extension PLDB {
             let cls = type(of: model)
             
             let statment = """
-            UPDATE "\(cls.tableName)" SET \(fields.map({ "\($0) = ?"}).joined(separator: ", ")) WHERE \(cls.uniqueIdName) = \(model.uniqueId)
+            UPDATE [\(cls.tableName)] SET \(fields.map({ "\($0) = ?"}).joined(separator: ", ")) WHERE \(cls.uniqueIdName) = \(model.uniqueId)
             """
             
             return (statment, generateValues(defines))
@@ -156,12 +156,12 @@ extension PLDB {
         /// 生成删除语句
         /// - Parameter model:
         /// - Returns:
-        static func delete(_ model: PLDBModel) -> String {
+        static func delete(_ model: PKDBModel) -> String {
             
             let cls = type(of: model)
             
             let statment = """
-            DELETE FROM "\(cls.tableName)" WHERE \(cls.uniqueIdName) = \(model.uniqueId)
+            DELETE FROM [\(cls.tableName)] WHERE \(cls.uniqueIdName) = \(model.uniqueId)
             """
             return statment
         }
@@ -170,9 +170,9 @@ extension PLDB {
         /// 生成删除表所有数据语句
         /// - Parameter model:
         /// - Returns:
-        static func deleteTable(_ cls: PLDBModel.Type) -> String {
+        static func deleteTable(_ cls: PKDBModel.Type) -> String {
             let statment = """
-            DELETE FROM "\(cls.tableName)"
+            DELETE FROM [\(cls.tableName)]
             """
             return statment
         }
@@ -180,9 +180,9 @@ extension PLDB {
         /// 生成删除表语句
         /// - Parameter cls:
         /// - Returns:
-        static func dropTable(_ cls: PLDBModel.Type) -> String {
+        static func dropTable(_ cls: PKDBModel.Type) -> String {
             let statment = """
-            DROP TABLE "\(cls.tableName)"
+            DROP TABLE [\(cls.tableName)]
             """
             return statment
         }

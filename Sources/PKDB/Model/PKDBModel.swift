@@ -1,6 +1,6 @@
 //
-//  PLDBModel+Model.swift
-//  PLDB
+//  PKDBModel+Model.swift
+//  PKDB
 //
 //  Created by Plumk on 2021/7/28.
 //
@@ -9,7 +9,7 @@ import Foundation
 
 
 /// 数据表模型
-public protocol PLDBModel: ColumnTransformable {
+public protocol PKDBModel: ColumnTransformable {
     init()
     
     /// 表名
@@ -23,7 +23,7 @@ public protocol PLDBModel: ColumnTransformable {
 }
 
 
-public extension PLDBModel {
+public extension PKDBModel {
     /// 字段类型
     static var columnType: ColumnType {
         return .INTEGER
@@ -32,7 +32,7 @@ public extension PLDBModel {
     /// 转换数据库数据为当前类型
     /// - Parameter value:
     /// - Returns:
-    static func transformFromColumnValue(_ value: Any, from db: PLDB) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
         guard let uniqueId = value as? Int else {
             return nil
         }
