@@ -12,7 +12,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-         .package(url: "https://github.com/ccgus/fmdb", from: "2.7.7"),
+        .package(url: "https://github.com/ccgus/fmdb", .exactItem("2.7.7")),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
