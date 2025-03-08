@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 /// 属性封装器包裹协议
 protocol ColumnProperty {
     

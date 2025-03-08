@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import GRDB
 
 extension Data: ColumnTransformable {
     public static var columnType: ColumnType { .BLOB }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: Database) -> Self? {
         return value as? Self
     }
     

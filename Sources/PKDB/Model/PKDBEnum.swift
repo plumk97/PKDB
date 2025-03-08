@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GRDB
 
 public protocol PKDBEnum: ColumnTransformable {
     
@@ -19,7 +20,7 @@ public extension RawRepresentable where Self: PKDBEnum, RawValue: ColumnTransfor
     /// 转换数据库数据为当前类型
     /// - Parameter value:
     /// - Returns:
-    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
+    static func transformFromColumnValue(_ value: Any, from db: Database) -> Self? {
         if let x = RawValue.transformFromColumnValue(value, from: db) {
             return .init(rawValue: x)
         }

@@ -6,8 +6,7 @@
 //
 
 import Foundation
-
-
+import GRDB
 
 extension PKDBModel {
     
@@ -44,7 +43,7 @@ extension PKDBModel {
     }
     
     
-    func update(_ dict: [AnyHashable: Any]?, from db: PKDB) {
+    func update(_ dict: [AnyHashable: Any]?, from db: Database) {
         guard let dict = dict else {
             return
         }

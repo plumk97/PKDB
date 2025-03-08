@@ -6,12 +6,12 @@
 //
 
 import Foundation
-
+import GRDB
 
 extension Bool: ColumnTransformable {
     public static var columnType: ColumnType { .BOOLEAN }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
+    public static func transformFromColumnValue(_ value: Any, from db: Database) -> Self? {
         return value as? Self
     }
     

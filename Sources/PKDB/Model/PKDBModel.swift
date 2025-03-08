@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import GRDB
 
 /// 数据表模型
 public protocol PKDBModel: ColumnTransformable {
@@ -32,12 +32,17 @@ public extension PKDBModel {
     /// 转换数据库数据为当前类型
     /// - Parameter value:
     /// - Returns:
-    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
-        guard let uniqueId = value as? Int else {
+    static func transformFromColumnValue(_ value: Any, from db: Database) -> Self? {
+        guard let intValue = value as? any BinaryInteger else {
             return nil
         }
-        
-        return db.query(self).where("id = ?", uniqueId).first()
+        let uniqueId = Int.init(truncatingIfNeeded: intValue)
+        do {
+            return try Query(db).get(uniqueId)
+        } catch {
+            print(error)
+            return nil
+        }
     }
     
     /// 转换当前数据为数据库数据

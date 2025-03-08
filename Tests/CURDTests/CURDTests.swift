@@ -16,7 +16,7 @@ enum Gender: Int, PKDBEnum {
 struct User: PKDBModel {
     
     /// 表名
-    static var tableName: String { "User" }
+    static var tableName: String { "users" }
     
     /// 唯一id
     static var uniqueIdName: String { "id" }
@@ -54,7 +54,7 @@ struct User: PKDBModel {
 struct Pet: PKDBModel {
     
     /// 表名
-    static var tableName: String { "Pet" }
+    static var tableName: String { "pets" }
     
     /// 唯一id
     static var uniqueIdName: String { "id" }
@@ -71,97 +71,103 @@ struct Pet: PKDBModel {
 
 final class CURDTests: XCTestCase {
     
-    func createDBPath() -> String {
+    func databasePath() -> String {
         var path = FileManager.default.homeDirectoryForCurrentUser
         path.appendPathComponent("pk_test.db")
 //        try? FileManager.default.removeItem(at: path)
         return path.relativePath
     }
     
-    func createDB() -> PKDB {
-        let db = PKDB(path: createDBPath())
-        
-        XCTAssert(db.open(), "数据库打开失败")
-        db.createTable(User())
-        db.createTable(Pet())
-        return db
-    }
-    
-    func insertOneData() -> PKDB {
-        let db = createDB()
-        let user = db.create(User(name: "xxx", pet: Pet(name: "dog")))
-        print(user)
+    func createDB() throws -> PKDB {
+        let db = try PKDB(path: databasePath())
+        try db.createTable(User())
+        try db.createTable(Pet())
         return db
     }
     
     func testCreate() throws {
-        _ = createDB()
+        _ = try createDB()
+    }
+    
+    
+    func insertOneData() throws {
+        let db = try createDB()
+        let user = try db.create(User(
+            name: "xxx",
+            pet: Pet(name: "dog"),
+            bool: true,
+            data: "sadd".data(using: .utf8),
+            date: Date(),
+            float: 1.23,
+            double: 3.21
+        ))
+        print(user)
     }
     
     
     func testInsert() throws {
-        _ = insertOneData()
+        _ = try insertOneData()
     }
     
     func testBatchInsert() throws {
-        let db = createDB()
+        let db = try createDB()
         for i in 1 ... 10000 {
-            _ = db.create(User(name: "user_\(i)"))
+            _ = try db.create(User(name: "user_\(i)"))
         }
     }
     
     func testBatchInsert_Transaction() throws {
-        let db = createDB()
-        db.transaction { db in
-            for i in 1 ... 10000 {
-                _ = db.create(User(name: "user_\(i)"))
-            }
-            return nil
+        let db = try createDB()
+        try db.batch { db in
+            let model = try db.query(User.self).first()
+            print(model)
+//            for i in 1 ... 10000 {
+//                _ = try db.create(User(name: "user_\(i)"))
+//            }
         }
     }
     
     func testQuery() throws {
     
+        let db = try createDB()
+        if let model = try db.query(User.self).get(5) {
+            print(model)
+        }
         
-        let db = createDB()
-        
-        if let user = db.query(User.self).first() {
+        if let user = try db.query(User.self).where("name = ?", "xxx").last() {
             print(user)
         }
         
-        if let users = db.query(User.self).all() {
-            print(users.count)
-        }
-
-        if let user = db.query(User.self).where("name = ?", "user_1").first() {
-            print(user)
-        }
-        
+        let users = try db.query(User.self).where("name = ?", "xxx").all()
+        print(users)
     }
     
     func testDelete() throws {
-        let db = createDB()
+        let db = try createDB()
         
-        if let user = db.query(User.self).first() {
-            db.delete(user)
+        if let user = try db.query(User.self).first() {
+            try db.delete(user)
         }
-        
-        _ = db.deleteTable(User.self)
+    }
+    
+    func testDeleteTable() throws {
+        let db = try createDB()
+        try db.deleteTable(User.self)
     }
     
     func testUpdate() throws {
-        let db = createDB()
-        if let user = db.query(User.self).first() {
+        let db = try createDB()
+        if let user = try db.query(User.self).first() {
             user.pet?.name = "fff"
             user.name = "zzz"
-            db.save(user)
+            try db.save(user)
         }
     }
     
     func testRaw() throws {
-        let db = createDB()
+        let db = try createDB()
         
-        guard let models = db.raw("SELECT * FROM User").query(User.self) else {
+        guard let models = try db.raw("SELECT * FROM users").query(User.self) else {
             fatalError()
         }
         print(models.last)

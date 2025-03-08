@@ -6,15 +6,20 @@
 //
 
 import Foundation
+import GRDB
 
-public protocol FloatTransform: ColumnTransformable {
+public protocol FloatTransform: ColumnTransformable, BinaryFloatingPoint {
 }
 
 public extension FloatTransform {
     static var columnType: ColumnType { .REAL }
     
-    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
-        return value as? Self
+    static func transformFromColumnValue(_ value: Any, from db: Database) -> Self? {
+        if let floatValue = value as? any BinaryFloatingPoint {
+            return self.init(floatValue)
+        }
+        
+        return 0
     }
     
     func transformToColumnValue() -> Any? {

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import GRDB
 
 public protocol ColumnTransformable {
     
@@ -16,7 +16,7 @@ public protocol ColumnTransformable {
     /// 转换数据库数据为当前类型
     /// - Parameter value:
     /// - Returns:
-    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self?
+    static func transformFromColumnValue(_ value: Any, from db: Database) -> Self?
     
     /// 转换当前数据为数据库数据
     /// - Returns:

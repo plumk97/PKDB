@@ -6,16 +6,19 @@
 //
 
 import Foundation
+import GRDB
 
-
-public protocol IntTransform: ColumnTransformable {
+public protocol IntTransform: ColumnTransformable, BinaryInteger {
 }
 
 public extension IntTransform {
     static var columnType: ColumnType { .INTEGER }
     
-    static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Self? {
-        return value as? Self
+    static func transformFromColumnValue(_ value: Any, from db: Database) -> Self? {
+        if let intValue = value as? (any BinaryInteger) {
+            return self.init(truncatingIfNeeded: intValue)
+        }
+        return 0
     }
     
     func transformToColumnValue() -> Any? {

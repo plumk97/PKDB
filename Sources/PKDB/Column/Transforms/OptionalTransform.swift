@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import GRDB
 
 extension Optional: ColumnTransformable where Wrapped: ColumnTransformable {
     public static var columnType: ColumnType {
         return Wrapped.columnType
     }
     
-    public static func transformFromColumnValue(_ value: Any, from db: PKDB) -> Optional<Wrapped>? {
+    public static func transformFromColumnValue(_ value: Any, from db: Database) -> Optional<Wrapped>? {
         return Wrapped.transformFromColumnValue(value, from: db)
     }
     
